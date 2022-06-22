@@ -24,7 +24,7 @@ public class RoleServise  {
     }
 
     public Set<Role> findByIdRoles(String roleName) {
-        return roleRepository.getRoleByRoleName(roleName);
+        return (Set<Role>) roleRepository.findByName(roleName);
     }
 
 
