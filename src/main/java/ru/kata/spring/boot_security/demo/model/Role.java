@@ -8,13 +8,15 @@ import java.util.Set;
 
 
 @Entity
-@Table(name = "users")
+@Table(name = "roles")
 public class Role implements GrantedAuthority {
 
     @Id
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
+    private Integer id;
+    @Column
     private String name;
-    @Transient
     @ManyToMany(fetch = FetchType.EAGER,mappedBy = "roles")
     private Set<User> users;
 
@@ -40,11 +42,11 @@ public class Role implements GrantedAuthority {
         this.users = users;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -11,6 +11,7 @@ public class RoleServise  {
 
     private final RoleRepository roleRepository;
 
+    @Autowired
     public RoleServise(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
@@ -19,7 +20,7 @@ public class RoleServise  {
         return  new HashSet<>(roleRepository.findAll());
     }
 
-    public Role findById(Long id) {
+    public Role findById(Integer id) {
         return roleRepository.getById(id);
     }
 

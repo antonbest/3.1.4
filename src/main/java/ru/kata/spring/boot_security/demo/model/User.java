@@ -25,11 +25,11 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
 
-    @Column(name = "username")
+    @Column
     private String username;
-    @Column(name = "password")
+    @Column
     private String password;
-    @Column(name = "email")
+    @Column
     private String email;
 
 
