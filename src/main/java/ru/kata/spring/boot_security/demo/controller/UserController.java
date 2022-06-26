@@ -66,18 +66,23 @@ public class UserController {
         return "redirect:/admin/";
     }
 
-    @GetMapping("/admin/user-create")
+    @PostMapping("/user-update")
+    public String updateUser(User user) {
+        userService.saveUser(user);
+        return "redirect:/admin";
+    }
+
+    @GetMapping("/users-create")
     public String createUserForm(Model model) {
         model.addAttribute("user", new User());
         model.addAttribute("role", new ArrayList<Role>());
         return "user-create";
     }
 
-    @PostMapping("/admin/user-create")
-    public String createUser (@ModelAttribute("user") User user, @RequestParam(value = "role") String[] roles) {
-        user.setRoles(getRoles(roles));
+    @PostMapping("/users-create")
+    public String createUser(User user) {
         userService.saveUser(user);
-        return "redirect:/admin/";
+        return "redirect:/admin";
     }
 
     @GetMapping("/admin/user-delete/{id}")
