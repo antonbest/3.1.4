@@ -14,7 +14,7 @@ public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    private Integer id;
+    private Long id;
     @Column
     private String name;
     @ManyToMany(fetch = FetchType.EAGER,mappedBy = "roles")
@@ -24,7 +24,6 @@ public class Role implements GrantedAuthority {
     public String getAuthority() {
         return getName();
     }
-
 
     public String getName() {
         return name;
@@ -42,11 +41,11 @@ public class Role implements GrantedAuthority {
         this.users = users;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -56,4 +55,11 @@ public class Role implements GrantedAuthority {
     }
 
     public Role(){};
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

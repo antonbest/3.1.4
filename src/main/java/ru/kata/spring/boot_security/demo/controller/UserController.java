@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -10,9 +9,10 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
+import ru.kata.spring.boot_security.demo.servise.RoleServise;
 import ru.kata.spring.boot_security.demo.servise.UserService;
 
-import java.util.ArrayList;
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,11 +22,13 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RoleServise roleServise;
 
-    public UserController(UserService userService, UserRepository userRepository, RoleRepository roleRepository) {
+    public UserController(UserService userService, UserRepository userRepository, RoleRepository roleRepository, RoleServise roleServise) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.roleServise = roleServise;
     }
 
 
@@ -38,8 +40,9 @@ public class UserController {
         return roleSet;
     }
 
+
     @GetMapping("/user")
-    public String userInfo(Model model) {
+    public String userInfo(Model model, Principal principal) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) userService.loadUserByUsername(auth.getName());
         model.addAttribute("user", user);
@@ -48,47 +51,33 @@ public class UserController {
 
     @GetMapping("/admin")
     public String adminInfo(Model model) {
-        model.addAttribute("users", userService.allUsers());
-        return "user-list";
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        model.addAttribute("allUsers", userService.allUsers());
+        model.addAttribute("userMain", user);
+        model.addAttribute("roles", roleServise.getAllRoles());
+        return "admin";
     }
 
-    @GetMapping("/admin/user-update/{id}")
-    public String getUserById(@PathVariable("id") Integer id, Model model) {
-        User user = userService.findUserById(id);
-        model.addAttribute("user", user);
-        return "user-update";
-    }
 
-    @PostMapping("/admin/{id}")
-    public String updateUser(User user, @PathVariable Integer id, @RequestParam(value = "role") String[] roles) {
-        user.setRoles(getRoles(roles));
-        userService.saveUser(user);
-        return "redirect:/admin/";
-    }
 
-    @PostMapping("/user-update")
-    public String updateUser(User user) {
-        userService.saveUser(user);
+    @PostMapping("/admin/create")
+    public String addUser(User user, @RequestParam ("listRoles") long[] roles) {
+        userService.saveUser(user,roles);
         return "redirect:/admin";
     }
 
-    @GetMapping("/users-create")
-    public String createUserForm(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("role", new ArrayList<Role>());
-        return "user-create";
-    }
 
-    @PostMapping("/users-create")
-    public String createUser(User user) {
-        userService.saveUser(user);
+    @PostMapping("/admin/update")
+    public String update(@ModelAttribute("user") User user, @RequestParam("listRoles") long[] roleId) {
+        userService.updateUser(user, roleId);
         return "redirect:/admin";
     }
 
-    @GetMapping("/admin/user-delete/{id}")
-    public String deleteUser(@PathVariable("id") Integer id) {
+
+    @PostMapping("/admin/delete/{id}")
+    public String removeUser(@PathVariable Integer id) {
         userService.deleteUser(id);
-        return "redirect:/admin/";
+        return "redirect:/admin";
     }
 
 }

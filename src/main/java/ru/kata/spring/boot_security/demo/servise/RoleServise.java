@@ -1,12 +1,13 @@
 package ru.kata.spring.boot_security.demo.servise;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 
 import java.util.HashSet;
 import java.util.Set;
-
+@Service
 public class RoleServise  {
 
     private final RoleRepository roleRepository;
@@ -20,7 +21,7 @@ public class RoleServise  {
         return  new HashSet<>(roleRepository.findAll());
     }
 
-    public Role findById(Integer id) {
+    public Role findById(Long id) {
         return roleRepository.getById(id);
     }
 
