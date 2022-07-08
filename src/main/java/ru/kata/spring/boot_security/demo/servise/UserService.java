@@ -101,4 +101,18 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(userId);
     }
 
+    @Transactional
+    public void updateUser(User user) {
+        if (user.getPassword().startsWith("$2a$10$") && user.getPassword().length() == 60) {
+            user.setPassword(user.getPassword());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        userRepository.save(user);
+    }
+
+    public User getByUsername(String username){
+        return userRepository.findByUsername(username);
+    }
+
 }
