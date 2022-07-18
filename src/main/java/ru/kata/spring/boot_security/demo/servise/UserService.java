@@ -10,10 +10,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.dao.RoleDao;
+import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
-import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,8 +28,8 @@ public class UserService implements UserDetailsService {
 
     @PersistenceContext
     private EntityManager em;
-    UserRepository userRepository;
-    RoleRepository roleRepository;
+    private UserDao userDao;
+    private RoleDao roleDao;
     PasswordEncoder passwordEncoder;
     private Set<Role> roles;
 
@@ -38,9 +38,9 @@ public class UserService implements UserDetailsService {
     }
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, @Lazy PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+    public UserService(UserDao userDao, RoleDao roleDao, @Lazy PasswordEncoder passwordEncoder) {
+        this.userDao = userDao;
+        this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -49,12 +49,12 @@ public class UserService implements UserDetailsService {
     public void saveUser(User user, long[] listRoles) {
         Set<Role> rolesSet = new HashSet<>();
         for (int i = 0; i < listRoles.length; i++) {
-            rolesSet.add(roleRepository.findById(listRoles[i]));
+            rolesSet.add(roleDao.findRoleById(listRoles[i]));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         user.setRoles(rolesSet);
-        userRepository.save(user);
+        userDao.saveUser(user);
     }
 
 
@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
     public void updateUser(User user, long[] role_id) {
         Set<Role> rolesSet = new HashSet<>();
         for (int i = 0; i < role_id.length; i++) {
-            rolesSet.add(roleRepository.findById(role_id[i]));
+            rolesSet.add(roleDao.findRoleById(role_id[i]));
         }
         if (user.getPassword().startsWith("$2a$10$") && user.getPassword().length() == 60) {
             user.setPassword(user.getPassword());
@@ -70,13 +70,13 @@ public class UserService implements UserDetailsService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         user.setRoles(rolesSet);
-        userRepository.save(user);
+        userDao.saveUser(user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        User user = userDao.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(String.format("User '%s' not found", username));
         }
@@ -85,20 +85,20 @@ public class UserService implements UserDetailsService {
 
 
     public User findUserById(Integer userId) {
-        return userRepository.findById(userId).orElse(null);
+        return userDao.getById(userId);
     }
 
     public List<User> allUsers() {
-        return userRepository.findAll();
+        return userDao.getAllUsers();
     }
 
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        return userDao.saveUser(user);
     }
 
     public void deleteUser(Integer userId) {
-        userRepository.deleteById(userId);
+        userDao.deleteUser(userId);
     }
 
     @Transactional
@@ -108,11 +108,11 @@ public class UserService implements UserDetailsService {
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        userRepository.save(user);
+        userDao.saveUser(user);
     }
 
     public User getByUsername(String username){
-        return userRepository.findByUsername(username);
+        return userDao.findByUsername(username);
     }
 
 }
